@@ -1,5 +1,6 @@
 package com.bsuir.distcomp.controller;
 
+import com.bsuir.distcomp.dto.CommentListResponseTo;
 import com.bsuir.distcomp.dto.CommentRequestTo;
 import com.bsuir.distcomp.dto.CommentResponseTo;
 import com.bsuir.distcomp.kafka.CommentProducer;
@@ -29,11 +30,10 @@ public class CommentController {
         request.setOperation(OperationType.GET_ALL);
         request.setCorrelationId(correlationId);
 
-        CompletableFuture<CommentResponseTo> future = holder.create(correlationId);
+        CompletableFuture<CommentListResponseTo> future = holder.createList(correlationId);
         producer.send(request);
 
-        CommentResponseTo response = future.get(1, TimeUnit.SECONDS);
-
+        CommentListResponseTo response = future.get(3, TimeUnit.SECONDS);
         return ResponseEntity.ok(response);
     }
 
@@ -49,11 +49,10 @@ public class CommentController {
         request.setOperation(OperationType.GET_BY_ID);
         request.setCorrelationId(correlationId);
 
-        CompletableFuture<CommentResponseTo> future = holder.create(correlationId);
+        CompletableFuture<CommentResponseTo> future = holder.createSingle(correlationId);
         producer.send(request);
 
-        CommentResponseTo response = future.get(1, TimeUnit.SECONDS);
-
+        CommentResponseTo response = future.get(3, TimeUnit.SECONDS);
         return ResponseEntity.ok(response);
     }
 
@@ -61,7 +60,6 @@ public class CommentController {
     public ResponseEntity<?> create(@RequestBody CommentRequestTo dto) {
         dto.setOperation(OperationType.CREATE);
         producer.send(dto);
-
         return ResponseEntity.accepted().build();
     }
 
@@ -73,7 +71,13 @@ public class CommentController {
         dto.setTopicId(topicId);
         dto.setOperation(OperationType.UPDATE);
         producer.send(dto);
+        return ResponseEntity.accepted().build();
+    }
 
+    @PutMapping
+    public ResponseEntity<?> update(@RequestBody CommentRequestTo dto) {
+        dto.setOperation(OperationType.UPDATE);
+        producer.send(dto);
         return ResponseEntity.accepted().build();
     }
 
@@ -84,9 +88,7 @@ public class CommentController {
         dto.setId(id);
         dto.setTopicId(topicId);
         dto.setOperation(OperationType.DELETE);
-
         producer.send(dto);
-
         return ResponseEntity.accepted().build();
     }
 }
