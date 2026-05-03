@@ -19,9 +19,8 @@ databaseChangeLog:
             sql: |
               CREATE TABLE IF NOT EXISTS distcomp.tbl_comment (
                   topic_id bigint,
-                  id uuid,
-                  writer_id bigint,
+                  id bigint,
                   content text,
-                  created timestamp,
+                  status text,
                   PRIMARY KEY ((topic_id), id)
-              );4
+              );
