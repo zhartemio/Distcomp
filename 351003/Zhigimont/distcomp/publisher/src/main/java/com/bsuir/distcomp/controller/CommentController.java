@@ -1,90 +1,90 @@
 package com.bsuir.distcomp.controller;
 
 import com.bsuir.distcomp.dto.CommentRequestTo;
+import com.bsuir.distcomp.dto.CommentResponseTo;
+import com.bsuir.distcomp.kafka.CommentProducer;
+import com.bsuir.distcomp.service.ResponseHolder;
+import com.bsuir.types.OperationType;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/v1.0/comments")
+@RequiredArgsConstructor
 public class CommentController {
 
-    private final WebClient webClient;
+    private final CommentProducer producer;
+    private final ResponseHolder holder;
 
-    public CommentController(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:24130/api/v1.0").build();
-    }
-
-    // GET /comments
     @GetMapping
-    public ResponseEntity<?> getAllComments(@RequestParam(required = false) Long topicId) {
-        if (topicId != null) {
-            return webClient.get()
-                    .uri("/comments/{topicId}", topicId)
-                    .retrieve()
-                    .toEntity(Object.class)
-                    .block();
-        } else {
-            return webClient.get()
-                    .uri("/comments")
-                    .retrieve()
-                    .toEntity(Object.class)
-                    .block();
-        }
+    public ResponseEntity<?> getAll() throws Exception {
+
+        String correlationId = UUID.randomUUID().toString();
+
+        CommentRequestTo request = new CommentRequestTo();
+        request.setOperation(OperationType.GET_ALL);
+        request.setCorrelationId(correlationId);
+
+        CompletableFuture<CommentResponseTo> future = holder.create(correlationId);
+
+        producer.send(request);
+
+        CommentResponseTo response = future.get(1, TimeUnit.SECONDS);
+
+        return ResponseEntity.ok(response);
     }
 
-    // GET /comments/{topicId}  (для совместимости с тестами, которые идут без /comments)
-    @GetMapping("/{topicId}")
-    public ResponseEntity<?> getCommentsByTopic(@PathVariable Long topicId) {
-        return webClient.get()
-                .uri("/comments/{topicId}", topicId)
-                .retrieve()
-                .toEntity(Object.class)
-                .block();
-    }
 
-    // GET /comments/{topicId}/{id} (если нужно получить конкретный комментарий)
-    @GetMapping("/{topicId}/{id}")
-    public ResponseEntity<?> getCommentById(@PathVariable Long topicId, @PathVariable Long id) {
-        return webClient.get()
-                .uri("/comments/{topicId}/{id}", topicId, id)
-                .retrieve()
-                .toEntity(Object.class)
-                .block();
-    }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getById(@PathVariable Long id) throws Exception {
 
-    // POST /comments
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> createComment(@RequestBody CommentRequestTo request) {
-        return webClient.post()
-                .uri("/comments")
-                .bodyValue(request)
-                .retrieve()
-                .toEntity(Object.class)
-                .block();
-    }
+        String correlationId = UUID.randomUUID().toString();
 
-    // PUT /comments/{id}
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateComment(@PathVariable Long id, @RequestBody CommentRequestTo request) {
+        CommentRequestTo request = new CommentRequestTo();
         request.setId(id);
-        return webClient.put()
-                .uri("/comments/{id}", id)
-                .bodyValue(request)
-                .retrieve()
-                .toEntity(Object.class)
-                .block();
+        request.setOperation(OperationType.GET_BY_ID);
+        request.setCorrelationId(correlationId);
+
+        CompletableFuture<CommentResponseTo> future = holder.create(correlationId);
+        producer.send(request);
+
+        CommentResponseTo response = future.get(1, TimeUnit.SECONDS);
+
+        return ResponseEntity.ok(response);
     }
 
-    // DELETE /comments/{id}
+    @PostMapping
+    public ResponseEntity<?> create(@RequestBody CommentRequestTo dto) {
+        dto.setOperation(OperationType.CREATE);
+        producer.send(dto);
+
+        return ResponseEntity.accepted().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id,
+                                    @RequestBody CommentRequestTo dto) {
+        dto.setId(id);
+        dto.setOperation(OperationType.UPDATE);
+        producer.send(dto);
+
+        return ResponseEntity.accepted().build();
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteComment(@PathVariable Long id) {
-        return webClient.delete()
-                .uri("/comments/{id}", id)
-                .retrieve()
-                .toEntity(Object.class)
-                .block();
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        CommentRequestTo dto = new CommentRequestTo();
+        dto.setId(id);
+        dto.setOperation(OperationType.DELETE);
+
+        producer.send(dto);
+
+        return ResponseEntity.accepted().build();
     }
 }

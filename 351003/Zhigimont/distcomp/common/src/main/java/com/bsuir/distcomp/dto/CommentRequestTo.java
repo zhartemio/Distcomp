@@ -1,15 +1,14 @@
 package com.bsuir.distcomp.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import com.bsuir.types.OperationType;
 import lombok.Data;
 
 @Data
 public class CommentRequestTo {
-    private Long topicId;
     private Long id;
-    @NotBlank
-    @Size(min = 2, max = 2048)
+    private Long topicId;
     private String content;
+    private OperationType operation;
 
+    private String correlationId;
 }

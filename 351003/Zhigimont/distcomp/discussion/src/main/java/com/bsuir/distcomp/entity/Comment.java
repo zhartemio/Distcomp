@@ -1,5 +1,6 @@
 package com.bsuir.distcomp.entity;
 
+import com.bsuir.types.Status;
 import lombok.Data;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
@@ -12,6 +13,8 @@ public class Comment {
     private CommentKey key;
 
     private String content;
+
+    private Status status;
 
 }
 
