@@ -6,7 +6,6 @@ import com.bsuir.distcomp.kafka.CommentProducer;
 import com.bsuir.distcomp.service.ResponseHolder;
 import com.bsuir.types.OperationType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,6 @@ public class CommentController {
 
     @GetMapping
     public ResponseEntity<?> getAll() throws Exception {
-
         String correlationId = UUID.randomUUID().toString();
 
         CommentRequestTo request = new CommentRequestTo();
@@ -32,7 +30,6 @@ public class CommentController {
         request.setCorrelationId(correlationId);
 
         CompletableFuture<CommentResponseTo> future = holder.create(correlationId);
-
         producer.send(request);
 
         CommentResponseTo response = future.get(1, TimeUnit.SECONDS);
@@ -40,14 +37,15 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable Long id) throws Exception {
+    public ResponseEntity<?> getById(@PathVariable Long id,
+                                     @RequestParam Long topicId) throws Exception {
 
         String correlationId = UUID.randomUUID().toString();
 
         CommentRequestTo request = new CommentRequestTo();
         request.setId(id);
+        request.setTopicId(topicId);
         request.setOperation(OperationType.GET_BY_ID);
         request.setCorrelationId(correlationId);
 
@@ -69,8 +67,10 @@ public class CommentController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id,
+                                    @RequestParam Long topicId,
                                     @RequestBody CommentRequestTo dto) {
         dto.setId(id);
+        dto.setTopicId(topicId);
         dto.setOperation(OperationType.UPDATE);
         producer.send(dto);
 
@@ -78,9 +78,11 @@ public class CommentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable Long id,
+                                    @RequestParam Long topicId) {
         CommentRequestTo dto = new CommentRequestTo();
         dto.setId(id);
+        dto.setTopicId(topicId);
         dto.setOperation(OperationType.DELETE);
 
         producer.send(dto);

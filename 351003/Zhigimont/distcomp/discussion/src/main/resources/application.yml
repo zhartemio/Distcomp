@@ -11,7 +11,7 @@ spring:
       local-datacenter: datacenter1
 
   liquibase:
-    change-log: classpath:db/changelog/db.changelog-master.yaml
+    change-log: classpath:db/changelog/db.changelog-master.yml
 
   kafka:
     bootstrap-servers: localhost:9092
