@@ -14,9 +14,15 @@ public class ResponseHolder {
     private final Map<String, CompletableFuture<CommentResponseTo>> map = new ConcurrentHashMap<>();
     private final Map<String, CompletableFuture<CommentListResponseTo>> mapL = new ConcurrentHashMap<>();
 
-    public CompletableFuture<CommentResponseTo> create(String id) {
+    public CompletableFuture<CommentResponseTo> createSingle(String id) {
         CompletableFuture<CommentResponseTo> future = new CompletableFuture<>();
         map.put(id, future);
+        return future;
+    }
+
+    public CompletableFuture<CommentListResponseTo> createList(String id) {
+        CompletableFuture<CommentListResponseTo> future = new CompletableFuture<>();
+        mapL.put(id, future);
         return future;
     }
 
