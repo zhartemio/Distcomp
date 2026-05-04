@@ -1,11 +1,15 @@
 package com.bsuir.distcomp.controller;
 
+import com.bsuir.distcomp.dto.CommentRequestTo;
 import com.bsuir.distcomp.dto.CommentResponseTo;
 import com.bsuir.distcomp.entity.Comment;
 import com.bsuir.distcomp.entity.CommentKey;
 import com.bsuir.distcomp.mapper.CommentMapper;
 import com.bsuir.distcomp.repository.CommentRepository;
 import com.bsuir.distcomp.exception.EntityNotFoundException;
+import com.bsuir.distcomp.service.CommentService;
+import com.bsuir.types.OperationType;
+import com.bsuir.types.Status;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,6 +29,7 @@ import java.util.stream.Collectors;
 public class CommentController {
 
     private final CommentRepository repository;
+    private final CommentService service;
     private final CommentMapper mapper;
 
     @GetMapping("/{id}")
@@ -55,6 +61,22 @@ public class CommentController {
 
         log.info("📡 Found comment: id={}, topicId={}",
                 comment.getKey().getId(), comment.getKey().getTopicId());
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    @PutMapping
+    public ResponseEntity<?> update(@RequestBody CommentRequestTo request) {
+        log.info("📡 REST PUT /comments - id={}", request.getId());
+        request.setOperation(OperationType.UPDATE);
+        request.setCorrelationId(UUID.randomUUID().toString());
+        service.process(request);
+        CommentResponseTo response = new CommentResponseTo();
+        response.setId(request.getId());
+        response.setTopicId(request.getTopicId());
+        response.setContent(request.getContent());
+        response.setStatus(Status.APPROVE);
 
         return ResponseEntity.ok(response);
     }
