@@ -51,7 +51,7 @@ public class CommentController {
             CommentListResponseTo response = future.get(10, TimeUnit.SECONDS);
             log.info("🟢 [STEP 1] Response received: {} comments",
                     response.getComments() != null ? response.getComments().size() : 0);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response.getComments());
         } catch (Exception e) {
             log.error("🔴 [STEP 1] Timeout or error: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
