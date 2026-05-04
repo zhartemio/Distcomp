@@ -1,8 +1,8 @@
-package com.bsuir.distcomp.controller;
+package com.bsuir.distcomp.controller.v1;
 
-import com.bsuir.distcomp.dto.MarkerRequestTo;
-import com.bsuir.distcomp.dto.MarkerResponseTo;
-import com.bsuir.distcomp.service.MarkerService;
+import com.bsuir.distcomp.dto.TopicRequestTo;
+import com.bsuir.distcomp.dto.TopicResponseTo;
+import com.bsuir.distcomp.service.TopicService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,32 +11,32 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1.0/markers")
+@RequestMapping("/api/v1.0/topics")
 @RequiredArgsConstructor
-public class MarkerController {
+public class TopicController {
 
-    private final MarkerService service;
+    private final TopicService service;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public MarkerResponseTo create(@RequestBody @Valid MarkerRequestTo dto) {
+    public TopicResponseTo create(@RequestBody @Valid TopicRequestTo dto) {
         return service.create(dto);
     }
 
     @GetMapping
-    public List<MarkerResponseTo> getAll() {
+    public List<TopicResponseTo> getAll() {
         return service.getAll();
     }
 
     @GetMapping("/{id}")
-    public MarkerResponseTo getById(@PathVariable Long id) {
+    public TopicResponseTo getById(@PathVariable Long id) {
         return service.getById(id);
     }
 
     @PutMapping("/{id}")
-    public MarkerResponseTo update(
+    public TopicResponseTo update(
             @PathVariable Long id,
-            @RequestBody @Valid MarkerRequestTo dto) {
+            @RequestBody @Valid TopicRequestTo dto) {
 
         return service.update(id, dto);
     }

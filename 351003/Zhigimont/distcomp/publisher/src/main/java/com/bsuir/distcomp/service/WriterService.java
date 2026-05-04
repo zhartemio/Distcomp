@@ -8,6 +8,7 @@ import com.bsuir.distcomp.exception.EntityNotFoundException;
 import com.bsuir.distcomp.mapper.WriterMapper;
 import com.bsuir.distcomp.repository.WriterRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class WriterService implements CrudService<WriterRequestTo, WriterRespons
 
     private final WriterRepository repository;
     private final WriterMapper mapper;
+    private final PasswordEncoder passwordEncoder;
 
     public WriterResponseTo create(WriterRequestTo dto) {
         Optional<Writer> writerOpt = repository.findByLogin(dto.getLogin());
@@ -26,6 +28,7 @@ public class WriterService implements CrudService<WriterRequestTo, WriterRespons
             throw new EntityAlreadyExistsException("Writer with such login already exists");
         }
         Writer writer = mapper.toEntity(dto);
+        writer.setPassword(passwordEncoder.encode(writer.getPassword()));
         Writer saved = repository.saveAndFlush(writer);
         return mapper.toDto(saved);
     }

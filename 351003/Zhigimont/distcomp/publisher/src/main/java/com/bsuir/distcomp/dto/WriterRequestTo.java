@@ -18,5 +18,6 @@ public class WriterRequestTo {
     @Size(min = 2, max = 64)
     private String lastname;
 
+    private String role; 
 }
 

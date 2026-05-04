@@ -1,4 +1,4 @@
-package com.bsuir.distcomp.controller;
+package com.bsuir.distcomp.controller.v1;
 
 import com.bsuir.distcomp.dto.CommentListResponseTo;
 import com.bsuir.distcomp.dto.CommentRequestTo;
