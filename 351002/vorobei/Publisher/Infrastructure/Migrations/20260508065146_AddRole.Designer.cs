@@ -3,6 +3,7 @@ using System;
 using Infrastructure.DatabaseContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DistcompContext))]
-    partial class DistcompContextModelSnapshot : ModelSnapshot
+    [Migration("20260508065146_AddRole")]
+    partial class AddRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,6 +55,11 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("password");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("role");
+
                     b.HasKey("Id");
 
                     b.ToTable("tbl_creator", (string)null);
@@ -75,32 +83,6 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("tbl_mark", (string)null);
-                });
-
-            modelBuilder.Entity("DataAccess.Models.Post", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id")
-                        .HasAnnotation("Relational:JsonPropertyName", "id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("contex");
-
-                    b.Property<int>("StoryId")
-                        .HasColumnType("integer")
-                        .HasColumnName("story_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StoryId");
-
-                    b.ToTable("tbl_post", (string)null);
                 });
 
             modelBuilder.Entity("DataAccess.Models.Story", b =>
@@ -157,17 +139,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("tbl_story_mark");
                 });
 
-            modelBuilder.Entity("DataAccess.Models.Post", b =>
-                {
-                    b.HasOne("DataAccess.Models.Story", "Story")
-                        .WithMany("Posts")
-                        .HasForeignKey("StoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Story");
-                });
-
             modelBuilder.Entity("DataAccess.Models.Story", b =>
                 {
                     b.HasOne("DataAccess.Models.Creator", "Creator")
@@ -197,11 +168,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("DataAccess.Models.Creator", b =>
                 {
                     b.Navigation("Stories");
-                });
-
-            modelBuilder.Entity("DataAccess.Models.Story", b =>
-                {
-                    b.Navigation("Posts");
                 });
 #pragma warning restore 612, 618
         }
